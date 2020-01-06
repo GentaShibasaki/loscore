@@ -9,7 +9,7 @@ class LoScore {
   |~~~~~~~~~~
   * */
   uniq(array) {
-    let result = [];
+    const result = [];
     for (let i = 0; i < array.length; i++) {
       if (result.includes(array[i])) continue;
       result.push(array[i]);
@@ -35,8 +35,7 @@ class LoScore {
   }
 
   map(collection, iteratee) {
-    // YOUR CODE HERE
-    let result = [];
+    const result = [];
     this.each(collection, (value, key) => {
       result.push(iteratee(value, key, collection));
     });
@@ -74,9 +73,8 @@ class LoScore {
       (accumulator, value) => {
         if (typeof test === "function") {
           return !!(accumulator && test(value));
-        } else {
-          return !!(accumulator && value);
         }
+        return !!(accumulator && value);
       },
       true
     );
@@ -88,7 +86,7 @@ class LoScore {
   * */
   extend(obj, ...extra) {
     this.each(extra, (value) => {
-      for (let i of Object.keys(value)) {
+      for (const i of Object.keys(value)) {
         obj[i] = value[i];
       }
     });
@@ -111,7 +109,7 @@ class LoScore {
   }
 
   memoize(func) {
-    let cache = new Object();
+    const cache = new Object();
     return (...data) => {
       if (typeof cache[JSON.stringify(data)] === "undefined") {
         cache[JSON.stringify(data)] = func(...data);
@@ -121,7 +119,7 @@ class LoScore {
   }
 
   invoke(collection, functionOrKey) {
-    let result = [];
+    const result = [];
     if (typeof functionOrKey === "function") {
       for (let i = 0; i < collection.length; i++) {
         result.push(functionOrKey.apply(collection[i]));
@@ -149,9 +147,9 @@ class LoScore {
   }
 
   zip(...array) {
-    let result = [];
+    const result = [];
     for (let i = 0; i < array[0].length; i++) {
-      let tmp = [];
+      const tmp = [];
       for (let j = 0; j < array.length; j++) {
         tmp.push(array[j][i]);
       }
@@ -168,7 +166,7 @@ class LoScore {
 
   defaults(obj, ...extra) {
     this.each(extra, (value) => {
-      for (let i of Object.keys(value)) {
+      for (const i of Object.keys(value)) {
         if (typeof obj[i] === "undefined") obj[i] = value[i];
       }
     });
@@ -178,7 +176,7 @@ class LoScore {
   throttle(func, delay) {
     let time = 0;
     return () => {
-      let timePast = Date.now() - time;
+      const timePast = Date.now() - time;
       if (time && timePast < delay) return;
       func();
       time = Date.now();
