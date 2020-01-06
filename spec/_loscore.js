@@ -1,6 +1,6 @@
 const _ = require("../src/loscore");
 const { expect } = require("chai");
-const { spy } = require("sinon");
+const { spy, useFakeTimers } = require("sinon");
 
 const disallowedMethods = [
   "map",
@@ -719,7 +719,7 @@ describe("LoScore", () => {
       });
     });
 
-    describe.only("invoke", () => {
+    describe("invoke", () => {
       it("should not use native methods", () => {
         _.invoke([1, 2, 3], () => {});
         expect(spyReport()).to.be.false;
@@ -754,6 +754,178 @@ describe("LoScore", () => {
         const reversedStrings = _.invoke(["yan", "fan"], reverse);
         expect(reversedStrings).to.eql(["nay", "naf"]);
       });
+    });
+  });
+
+  describe("sortBy", () => {
+    it("should not use native methods", () => {
+      _.sortBy([1, 2, 3], () => {});
+      expect(spyReport()).to.be.false;
+    });
+    let array;
+    beforeEach(() => {
+      array = [
+        { firstName: "Genta", lastName: "Shibasaki" },
+        { firstName: "Sarah", lastName: "Ting" },
+        { firstName: "Travis", lastName: "Ricks" },
+        { firstName: "Steffie", lastName: "Harner" },
+      ];
+    });
+
+    it("should be able to sort by function", () => {
+      const sorted = _.sortBy(array, (value) => {
+        return value.lastName.length;
+      });
+      expect(sorted[0].firstName).to.eql("Sarah");
+      expect(sorted[1].firstName).to.eql("Travis");
+      expect(sorted[2].firstName).to.eql("Steffie");
+      expect(sorted[3].firstName).to.eql("Genta");
+    });
+
+    it("should be able to sort by string", () => {
+      const sorted = _.sortBy(array, "lastName");
+      expect(sorted[0].firstName).to.eql("Steffie");
+      expect(sorted[1].firstName).to.eql("Travis");
+      expect(sorted[2].firstName).to.eql("Genta");
+      expect(sorted[3].firstName).to.eql("Sarah");
+    });
+  });
+
+  describe("zip", () => {
+    it("should not use native methods", () => {
+      _.zip([1, 2, 3], () => {});
+      expect(spyReport()).to.be.false;
+    });
+
+    it("should be able to return an array that includes the same index item", () => {
+      const zipped = _.zip([1, 2, 3], [4, 5, 6], [7, 8, 9]);
+      expect(zipped[0]).to.eql([1, 4, 7]);
+      expect(zipped[1]).to.eql([2, 5, 8]);
+      expect(zipped[2]).to.eql([3, 6, 9]);
+    });
+  });
+  describe("delay", () => {
+    it("should not use native methods", () => {
+      _.delay(() => {}, 0, []);
+      expect(spyReport()).to.be.false;
+    });
+
+    it("should delay function call", () => {
+      let i = 0;
+      const func = (value) => {
+        i = i + value;
+      };
+      let clock = useFakeTimers();
+      _.delay(func, 1000, 5);
+      expect(i).to.eql(0);
+      clock.tick(1001);
+      expect(i).to.eql(5);
+    });
+  });
+
+  describe("defaults", () => {
+    beforeEach(() => {
+      spy(_, "each");
+    });
+
+    afterEach(() => {
+      _.each.restore();
+    });
+
+    it("should not use native methods", () => {
+      _.defaults({}, {});
+      expect(spyReport()).to.be.false;
+    });
+
+    it("should use each", () => {
+      _.defaults({}, {});
+      expect(_.each.called).to.be.true;
+    });
+
+    it("should shallowly copy one object to another", () => {
+      const objA = {
+        name: "moe",
+      };
+      const objB = {
+        age: 50,
+        favoriteThings: [
+          "raindrops on roses",
+          "whiskers on kittens",
+          "bright copper kettles",
+          "warm woolen mittens",
+          "brown paper packages tied up with strings",
+        ],
+      };
+      // Extend objA to have all of objB's properties.
+      const extendedObjA = _.defaults(objA, objB);
+      expect(extendedObjA).to.eql({
+        name: "moe",
+        age: 50,
+        favoriteThings: [
+          "raindrops on roses",
+          "whiskers on kittens",
+          "bright copper kettles",
+          "warm woolen mittens",
+          "brown paper packages tied up with strings",
+        ],
+      });
+
+      // Manipulate favoriteThings in objB's reference and expect the result to appear in extendedObjA's reference.
+      objB.favoriteThings.pop();
+      expect(extendedObjA.favoriteThings).to.eql(objB.favoriteThings);
+
+      expect(_.defaults({}, objA).age).to.eql(50);
+    });
+
+    it("should return the first argument", () => {
+      const objA = {};
+      const objB = {};
+      expect(_.defaults(objA, objB)).to.eql(objA);
+    });
+
+    it("should override properties found in the source", () => {
+      const objA = {
+        name: "moe",
+      };
+      const objB = {
+        name: "joe",
+      };
+      expect(_.defaults(objA, objB).name).to.eql("moe");
+    });
+
+    it("should use the last source property in case of conflict", () => {
+      const objA = {
+        name: "moe",
+      };
+      const objB = {
+        name: "joe",
+      };
+      const objC = {
+        name: "yan",
+      };
+      expect(_.defaults(objA, objB, objC).name).to.eql("moe");
+    });
+  });
+
+  describe("throttle", () => {
+    it("should not use native methods", () => {
+      _.throttle(() => {}, 0, []);
+      expect(spyReport()).to.be.false;
+    });
+
+    it("should throttle function", () => {
+      let i = 0;
+      const func = () => {
+        i++;
+      };
+      let clock = useFakeTimers(Date.now());
+      let func2 = _.throttle(func, 1000);
+      func2();
+      func2();
+      expect(i).to.eql(1);
+      clock.tick(1001);
+      func2();
+      expect(i).to.eql(2);
     });
   });
 });

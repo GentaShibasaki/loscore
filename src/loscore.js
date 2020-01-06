@@ -139,24 +139,50 @@ class LoScore {
   |~~~~~~~~~~~~~
   * */
 
-  sortBy() {
-    // YOUR CODE HERE
+  sortBy(collection, functionOrKey) {
+    return collection.sort((a, b) => {
+      if (typeof functionOrKey === "function") {
+        return functionOrKey(a) < functionOrKey(b) ? -1 : 1;
+      }
+      return a[functionOrKey] < b[functionOrKey] ? -1 : 1;
+    });
   }
 
-  zip() {
-    // YOUR CODE HREE
+  zip(...array) {
+    let result = [];
+    for (let i = 0; i < array[0].length; i++) {
+      let tmp = [];
+      for (let j = 0; j < array.length; j++) {
+        tmp.push(array[j][i]);
+      }
+      result.push(tmp);
+    }
+    return result;
   }
 
-  delay() {
-    // YOUR CODE HERE
+  delay(func, delay, ...arg) {
+    setTimeout(() => {
+      func(...arg);
+    }, delay);
   }
 
-  defaults() {
-    // YOUR CODE HERE
+  defaults(obj, ...extra) {
+    this.each(extra, (value) => {
+      for (let i of Object.keys(value)) {
+        if (typeof obj[i] === "undefined") obj[i] = value[i];
+      }
+    });
+    return obj;
   }
 
-  throttle() {
-    // YOUR CODE HERE
+  throttle(func, delay) {
+    let time = 0;
+    return () => {
+      let timePast = Date.now() - time;
+      if (time && timePast < delay) return;
+      func();
+      time = Date.now();
+    };
   }
 }
 
